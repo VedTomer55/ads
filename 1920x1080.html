@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Latest news and updates from around the world" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>News Hub - Latest News & Updates</title>
+
+    <!-- Preload critical assets -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- Custom Styles -->
+    <style>
+      /* Navigation Styles */
+      .navbar {
+        background-color: #1a237e;
+      }
+
+      /* Ad Container Styles */
+      .ad-container {
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        max-width: 100%;
+        overflow: hidden;
+      }
+
+      .ad-placeholder {
+        color: #666;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      /* Sidebar Styles */
+      .sticky-sidebar {
+        position: sticky;
+        top: 20px;
+      }
+
+      /* Footer Styles */
+      footer {
+        background-color: #1a237e;
+        color: white;
+      }
+
+      footer a {
+        color: white;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: #ddd;
+        text-decoration: underline;
+      }
+
+      /* Loading Spinner */
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      /* News Grid Styles */
+      .news-card {
+        margin-bottom: 1.5rem;
+      }
+
+      /* Social Links */
+      .social-links a {
+        margin-right: 1rem;
+      }
+    </style>
+
+    <!-- Ad System Configuration -->
+    <script>
+      window.adConfig = {
+        publisher: "news-hub",
+        version: "1.0.0",
+        adUnits: {
+          mainAd: "div-gpt-ad-main"
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <!-- Header Section -->
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+          <!-- Logo and Brand -->
+          <a class="navbar-brand" href="index.html">
+            <i class="fas fa-newspaper me-2"></i>
+            News Hub
+          </a>
+
+          <!-- Mobile Toggle Button -->
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <!-- Navigation Links -->
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+              <li class="nav-item">
+                <a class="nav-link active" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="trending.html">Trending</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="local.html">Local</a>
+              </li>
+            </ul>
+
+            <!-- Search Bar -->
+            <div class="d-flex">
+              <input
+                id="searchInput"
+                class="form-control me-2"
+                type="search"
+                placeholder="Search news..."
+              />
+              <button onclick="searchNews()" class="btn btn-light">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Single Main Ad Section -->
+    <section class="ad-section-main py-2">
+      <div class="container-fluid">
+        <div id="div-gpt-ad-main" class="ad-container">
+          <div class="ad-slot" data-ad-size="1920x1080" data-ad-position="main">
+            <div class="ad-placeholder">Advertisement</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Section -->
+    <main class="container mt-4">
+      <div class="row">
+        <!-- News Content Column -->
+        <div class="col-lg-8">
+          <!-- Featured News Section -->
+          <section class="featured-news mb-4">
+            <div id="featuredNews" class="card">
+              <div class="card-body">
+                <div class="loading-spinner">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- News Grid Section -->
+          <section class="news-grid">
+            <div id="newsGrid" class="row">
+              <!-- Sample News Card (will be populated by JavaScript) -->
+              <div class="col-md-6">
+                <div class="card news-card">
+                  <img src="/api/placeholder/400/200" class="card-img-top" alt="News image">
+                  <div class="card-body">
+                    <h5 class="card-title">Sample News Title</h5>
+                    <p class="card-text">This is a sample news description that will be replaced by actual content.</p>
+                    <a href="#" class="btn btn-primary">Read More</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Sidebar Column -->
+        <aside class="col-lg-4">
+          <div class="sticky-sidebar">
+            <!-- Trending Topics Section -->
+            <section class="trending-section mb-4">
+              <div class="card">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0">Trending Topics</h5>
+                </div>
+                <div class="card-body" id="trendingTopics">
+                  <!-- Sample Trending Topics (will be populated by JavaScript) -->
+                  <div class="trending-topic">
+                    <h6>#TrendingTopic1</h6>
+                    <p class="small text-muted">1.2K discussions</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="mt-5 py-4">
+      <div class="container">
+        <div class="row">
+          <!-- About Links -->
+          <div class="col-md-4">
+            <h5>About</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact</a></li>
+              <li><a href="#">Careers</a></li>
+            </ul>
+          </div>
+          
+          <!-- Categories Links -->
+          <div class="col-md-4">
+            <h5>Categories</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Technology</a></li>
+              <li><a href="#">Business</a></li>
+              <li><a href="#">Reviews</a></li>
+            </ul>
+          </div>
+          
+          <!-- Social Media Links -->
+          <div class="col-md-4">
+            <h5>Follow Us</h5>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook fa-lg"></i></a>
+              <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
+              <a href="#"><i class="fab fa-linkedin fa-lg"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Ad Container Initialization -->
+    <script>
+      window.addEventListener('DOMContentLoaded', (event) => {
+        // Initialize ad container
+        const adContainer = document.querySelector('.ad-container');
+        const slot = adContainer.querySelector('.ad-slot');
+        if (slot) {
+          // Set container dimensions based on ad-size
+          const size = slot.getAttribute('data-ad-size').split('x');
+          container.style.width = size[0] + 'px';
+          container.style.height = size[1] + 'px';
+        }
+      });
+
+      // Sample search function (you'll need to implement the actual search logic)
+      function searchNews() {
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput.value;
+        console.log('Searching for:', searchTerm);
+        // Implement your search logic here
+      }
+    </script>
+
+    <!-- Your custom scripts -->
+    <script src="./preload.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

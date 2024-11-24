@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>News Portal</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <meta name="robots" content="noindex" />
+    <meta name="robots" content="nofollow" />
+    <meta name="robots" content="noindex,nofollow" />
+    <style>
+      .sticky-sidebar {
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 140px);
+        overflow-y: auto;
+      }
+
+      .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: white;
+      }
+
+      .sticky-footer {
+        margin-top: auto;
+      }
+
+      .ad-slot {
+        background: #f8f9fa;
+        border: 1px dashed #dee2e6;
+        margin: 10px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .news-card {
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+      }
+
+      .news-card:hover {
+        transform: translateY(-5px);
+      }
+
+      /* Ad slot sizes */
+      .ad-320x480 {
+        width: 320px;
+        height: 480px;
+      }
+      .ad-320x50 {
+        width: 320px;
+        height: 50px;
+      }
+      .ad-320x100 {
+        width: 320px;
+        height: 100px;
+      }
+      .ad-300x250 {
+        width: 300px;
+        height: 250px;
+      }
+      .ad-480x320 {
+        width: 480px;
+        height: 320px;
+      }
+      .ad-300x600 {
+        width: 300px;
+        height: 600px;
+      }
+
+      .header-ad {
+        max-width: 100%;
+        overflow: hidden;
+        background: #f8f9fa;
+        padding: 10px 0;
+      }
+
+      @media (max-width: 768px) {
+        .sticky-sidebar {
+          position: static;
+          height: auto;
+        }
+
+        .ad-slot {
+          max-width: 100%;
+        }
+      }
+
+      :root {
+        --primary-color: #007bff;
+        --secondary-color: #6c757d;
+      }
+
+      body {
+        background-color: #f8f9fa;
+      }
+
+      .navbar {
+        background: linear-gradient(to right, var(--primary-color), #0056b3);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .news-card img {
+        height: 200px;
+        object-fit: cover;
+      }
+
+      footer {
+        background-color: #343a40;
+        color: #fff;
+      }
+
+      footer a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <i class="fas fa-newspaper me-2"></i>
+          News Hub
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="trending.html">Trending</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="local.html">Local</a>
+            </li>
+          </ul>
+          <div class="d-flex">
+            <input
+              id="searchInput"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search news..."
+            />
+            <button onclick="searchNews()" class="btn btn-light">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="sticky-header shadow-sm mb-4">
+      <div class="header-ad">
+        <div class="ad-slot ad-320x100 mx-auto">Header Ad Slot (320x100)</div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <section class="main-content">
+      <div class="section">
+        <div class="row">
+          <!-- Left Sidebar -->
+          <div class="col-lg-3">
+            <div class="sticky-sidebar">
+              <div class="ad-slot ad-300x600">Ad Slot (300x600)</div>
+              <!-- <div class="ad-slot ad-300x250">Ad Slot (300x250)</div> -->
+            </div>
+          </div>
+
+          <!-- Main Content Area -->
+          <div class="col-lg-6">
+            <div id="featuredNews"></div>
+            <div id="newsGrid" class="row"></div>
+          </div>
+
+          <!-- Right Sidebar -->
+          <div class="col-lg-3">
+            <div class="sticky-sidebar">
+              <div class="ad-slot ad-320x480">Ad Slot (320x480)</div>
+              <div class="ad-slot ad-320x50">Ad Slot (320x50)</div>
+              <div class="ad-slot ad-320x100">Ad Slot (320x100)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 sticky-footer">
+      <div class="container">
+        <div class="ad-slot ad-480x320 mx-auto mb-4">
+          Footer Ad Slot (480x320)
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <h5>About Us</h5>
+            <p>
+              Your trusted source for the latest news and updates from around
+              the world.
+            </p>
+          </div>
+          <div class="col-md-4">
+            <h5>Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Contact Us</a></li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Follow Us</h5>
+            <div>
+              <a href="#" class="text-light me-2">Facebook</a>
+              <a href="#" class="text-light me-2">Twitter</a>
+              <a href="#" class="text-light">Instagram</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

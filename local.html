@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced News Layout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="robots" content="noindex" />
+    <meta name="robots" content="nofollow" />
+    <meta name="robots" content="noindex,nofollow" />
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background: linear-gradient(to right, var(--primary-color), #0056b3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .ad-slot {
+            border: 1px dashed #dee2e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #6c757d;
+            margin: 1rem auto;
+            text-align: center;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
+        .ad-slot:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+
+        .news-card {
+            border: none;
+            transition: transform 0.3s ease;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .news-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .container-fluid {
+            padding: 0 2rem;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: #fff;
+            padding: 2rem 0;
+        }
+
+        footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-newspaper me-2"></i>News Hub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trending.html">Trending</a></li>
+                    <li class="nav-item"><a class="nav-link" href="local.html">Local</a></li>
+                </ul>
+                <div class="d-flex">
+                    <input id="searchInput" class="form-control me-2" type="search" placeholder="Search news...">
+                    <button onclick="searchNews()" class="btn btn-light">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Ad -->
+    <div class="ad-slot text-center w-100" style="height: 90px;">
+        Leaderboard Ad Slot (728x90)
+    </div>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <aside class="col-lg-2 d-none d-lg-block">
+                <div class="ad-slot" style="height: 480px;">Ad Slot (320x480)</div>
+                <div class="ad-slot" style="height: 600px;">Ad Slot (300x600)</div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="col-lg-8 col-md-12">
+                <div id="featuredNews"></div>
+                <div id="newsGrid" class="row"></div>
+                    <!-- Dynamic news articles will be loaded here -->
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="col-lg-2 d-none d-lg-block">
+                <div class="ad-slot" style="height: 50px;">Ad Slot (320x50)</div>
+                <div class="ad-slot" style="height: 100px;">Ad Slot (320x100)</div>
+                <div class="ad-slot" style="height: 320px;">Ad Slot (480x320)</div>
+                <div class="ad-slot" style="height: 250px;">Ad Slot (300x250)</div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5">
+        <div class="container text-center">
+            <!-- Footer Ad Slot -->
+            <div class="ad-slot mx-auto" style="width: 480px; height: 320px;">Footer Ad Slot (480x320)</div>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <h5>About Us</h5>
+                    <p>Your trusted source for the latest news and updates from around the world.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">Privacy Policy</a></li>
+                        <li><a href="#" class="text-light">Terms of Service</a></li>
+                        <li><a href="#" class="text-light">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <div>
+                        <a href="#" class="text-light me-2">Facebook</a>
+                        <a href="#" class="text-light me-2">Twitter</a>
+                        <a href="#" class="text-light">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
