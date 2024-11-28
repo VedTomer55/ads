@@ -1,65 +1,282 @@
 <!DOCTYPE html>
 <html>
-  <script>
-    function sendUrl(url) {
-      var img = document.createElement("img");
-      img.src = url;
-      img.style.display = "none";
-      document.body.appendChild(img);
-      trackViewablity();
-    }
-    function trackViewablity() {
-      const imageElement = document.getElementById("yourImageId");
-      let visibilityTime;
-      let scrollOutTime;
-      const observerOptions = { threshold: 0.5 };
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !visibilityTime) {
-            visibilityTime = performance.now();
-          }
-        });
-      }, observerOptions);
-      observer.observe(imageElement);
-      function isImageOutOfViewport(el) {
-        const rect = el.getBoundingClientRect();
-        return (
-          rect.bottom < 0 ||
-          rect.right < 0 ||
-          rect.left > window.innerWidth ||
-          rect.top > window.innerHeight
-        );
+  <head>
+    <title>Multi-Slot Ad System</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
       }
-      function handleScroll() {
-        let scrollUrl = new URL(
-          "https://bidder.verismart.ai/impression?imp_id=fda3e7ab-7711-4390-a080-fbde835018521732470522731_64_117_1&uuid=1732470522730%23d9612d12-5026-4eb3-8a76-806041b777a9-10pfo&src=1&ad_type=banner&campaign_id=117&creative_id=461&source_bundle_id=com.nbt.reader&placement=0&adv_id=64&uid=&site_flag=0"
-        );
-        if (
-          visibilityTime &&
-          !scrollOutTime &&
-          isImageOutOfViewport(imageElement)
-        ) {
-          scrollOutTime = performance.now();
-          const timeDifferenceInSeconds =
-            (scrollOutTime - visibilityTime) / 1000;
-          scrollUrl.searchParams.append("v_time", timeDifferenceInSeconds);
-          fetch(scrollUrl.toString());
-          observer.disconnect();
-          window.removeEventListener("scroll", handleScroll);
+      .ad-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .ad-slot {
+        border: 1px solid #ddd;
+        text-align: center;
+        padding: 10px;
+      }
+      .loading, .error {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Multi-Slot Ad System</h1>
+    <div id="adContainer" class="ad-container"></div>
+
+    <script>
+    class AdSystem {
+      constructor() {
+        this.adSlots = [
+          { width: 1920, height: 1080 },
+          { width: 600, height: 500 },
+          { width: 600, height: 500 },
+          { width: 1067, height: 600 },
+          { width: 1200, height: 800 },
+          { width: 1200, height: 800 },
+          { width: 300, height: 250 },
+          { width: 300, height: 250 },
+          { width: 300, height: 50 },
+          { width: 300, height: 50 },
+          { width: 300, height: 600 },
+          { width: 300, height: 600 },
+          { width: 320, height: 480 },
+          { width: 320, height: 480 },
+          { width: 480, height: 320 },
+          { width: 480, height: 320 }
+        ];
+        this.bidderUrl = "https://bidder.verismart.ai/advilion";
+        this.container = document.getElementById('adContainer');
+      }
+
+      async initialize() {
+        for (const slot of this.adSlots) {
+          const adSlotElement = this.createAdSlotElement(slot);
+          this.container.appendChild(adSlotElement);
+          await this.loadAdForSlot(adSlotElement, slot);
         }
       }
-      window.addEventListener("scroll", handleScroll);
+
+      createAdSlotElement(slot) {
+        const slotElement = document.createElement('div');
+        slotElement.className = 'ad-slot';
+        slotElement.setAttribute('data-width', slot.width);
+        slotElement.setAttribute('data-height', slot.height);
+        slotElement.innerHTML = `Loading ad for ${slot.width}x${slot.height}...`;
+        return slotElement;
+      }
+
+      async loadAdForSlot(slotElement, slot) {
+        try {
+          const bidResponse = await this.makeBidRequest(slot);
+          this.renderAd(slotElement, bidResponse);
+        } catch (error) {
+          this.showError(slotElement, "Failed to load advertisement");
+          console.error(`Ad System Error for ${slot.width}x${slot.height}:`, error);
+        }
+      }
+
+      async makeBidRequest(slot) {
+        const bidRequest = {
+          id: this.generateUUID(),
+          imp: [{
+            id: "1",
+            banner: {
+              w: slot.width,
+              h: slot.height,
+              pos: 0,
+            },
+            tagid: "477097",
+            bidfloor: 5,
+            bidfloorcur: "INR",
+            secure: 1,
+          }],
+          site: {
+            id: "87",
+            name: "NBT Android Apps",
+            bundle: "com.nbt.reader",
+            domain: "http://navbharattimes.indiatimes.com",
+            publisher: { id: "87" },
+          },
+          device: {
+            ua: navigator.userAgent,
+            geo: {
+              lat: 28.6139,
+              lon: 77.209,
+              type: 2,
+              country: "IND",
+              region: "DL",
+              city: "Delhi",
+            },
+            devicetype: 1,
+            make: "iPhone",
+            model: "Apple",
+            os: "iOS",
+            osv: "14",
+            js: 1,
+            carrier: "airtel",
+          },
+          user: {
+            buyeruid: this.generateUUID(),
+          },
+          at: 1,
+          tmax: 480,
+          cur: ["INR"],
+        };
+
+        const response = await fetch(this.bidderUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bidRequest),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+      }
+
+      generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+
+      renderAd(slotElement, bidResponse) {
+        if (!bidResponse?.seatbid?.[0]?.bid?.[0]) {
+          this.showError(slotElement, "No valid bid received");
+          return;
+        }
+
+        const bid = bidResponse.seatbid[0].bid[0];
+        const urls = this.extractUrls(bid.adm);
+
+        if (!urls.imageUrl) {
+          this.showError(slotElement, "Invalid ad creative received");
+          return;
+        }
+
+        // Clear slot content
+        slotElement.innerHTML = '';
+
+        // Create ad elements
+        const anchor = document.createElement('a');
+        const img = document.createElement('img');
+
+        // Set attributes
+        anchor.href = urls.clickUrl || '#';
+        img.src = urls.imageUrl;
+        img.width = urls.width;
+        img.height = urls.height;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+
+        // Add loading and error handlers
+        img.onload = () => {
+          if (urls.impressionUrl) {
+            this.trackViewability(img, urls.impressionUrl);
+          }
+        };
+        img.onerror = () => {
+          this.showError(slotElement, "Failed to load advertisement image");
+        };
+
+        // Construct DOM
+        anchor.appendChild(img);
+        slotElement.appendChild(anchor);
+
+        // Handle win notice
+        if (bid.nurl) {
+          this.sendImpression(this.replaceAuctionMacros(bid.nurl, bid));
+        }
+      }
+
+      extractUrls(adm) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(adm, 'text/html');
+        const anchor = doc.querySelector('a');
+        const img = doc.querySelector('img');
+
+        return {
+          clickUrl: anchor?.href,
+          impressionUrl: img?.getAttribute('onload') 
+            ? this.extractImpressionUrl(img.getAttribute('onload')) 
+            : null,
+          imageUrl: img?.src,
+          width: img?.width,
+          height: img?.height
+        };
+      }
+
+      extractImpressionUrl(onloadAttr) {
+        const match = onloadAttr.match(/sendUrl\('([^']+)'\)/);
+        return match ? match[1] : null;
+      }
+
+      showError(slotElement, message) {
+        slotElement.innerHTML = `<div class="error">${message}</div>`;
+      }
+
+      trackViewability(imageElement, impressionUrl) {
+        const observerOptions = { threshold: 0.5 };
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              this.sendImpression(impressionUrl);
+              observer.unobserve(imageElement);
+            }
+          });
+        }, observerOptions);
+
+        observer.observe(imageElement);
+      }
+
+      sendImpression(url) {
+        if (!url) return;
+
+        fetch(url, {
+          method: 'GET',
+          mode: 'no-cors',
+          credentials: 'omit'
+        }).catch((error) => {
+          console.warn('Impression tracking failed', error);
+        });
+      }
+
+      replaceAuctionMacros(url, bid) {
+        return url
+          .replace('${AUCTION_ID}', bid.id || '')
+          .replace('${AUCTION_BID_ID}', bid.bidid || '')
+          .replace('${AUCTION_IMP_ID}', bid.impid || '')
+          .replace('${AUCTION_SEAT_ID}', bid.seat || '')
+          .replace('${AUCTION_AD_ID}', bid.adid || '')
+          .replace('${AUCTION_PRICE}', bid.price || '')
+          .replace('${AUCTION_CURRENCY}', 'INR')
+          .replace('${AUCTION_MBR}', '');
+      }
     }
-  </script>
-  <body>
-    <div>
-      <a
-        href="https://bidder.verismart.ai/click?creative_id=461&click_id=fda3e7ab-7711-4390-a080-fbde835018521732470522731_64_117_1&campaign_id=117&imp_id=fda3e7ab-7711-4390-a080-fbde835018521732470522731_64_117_1&ad_type=banner&uuid=1732470522730%23d9612d12-5026-4eb3-8a76-806041b777a9-10pfo&src=1&publisher_id=87&publisher_name=&ip=2409%3A40d2%3A2017%3A111c%3Ab96e%3Abdc6%3A679c%3A53d0&user_agent=Mozilla%2F5.0+%28Linux%3B+Android+14%3B+V2158+Build%2FUP1A.231005.007_IN%3B+wv%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Version%2F4.0+Chrome%2F126.0.6478.134+Mobile+Safari%2F537.36+%28Mobile%3B+afma-sdk-a-v241806999.233012000.1%29&uid=&banner_size=1920x1080&os=iOS&osv=14&tag=477097&sub_id=87&sub_id_1=NBT+Android+Apps&source_bundle_id=com.nbt.reader&placement=0&adv_id=64&site_flag=0"
-        ><img id='yourImageId'
-        onload=sendUrl('https://bidder.verismart.ai/impression?imp_id=fda3e7ab-7711-4390-a080-fbde835018521732470522731_64_117_1&click_id=fda3e7ab-7711-4390-a080-fbde835018521732470522731_64_117_1&uuid=1732470522730%23d9612d12-5026-4eb3-8a76-806041b777a9-10pfo&src=1&ad_type=banner&campaign_id=117&creative_id=461&publisher_id=87&publisher_name=&ip=2409%3A40d2%3A2017%3A111c%3Ab96e%3Abdc6%3A679c%3A53d0&user_agent=Mozilla%2F5.0+%28Linux%3B+Android+14%3B+V2158+Build%2FUP1A.231005.007_IN%3B+wv%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Version%2F4.0+Chrome%2F126.0.6478.134+Mobile+Safari%2F537.36+%28Mobile%3B+afma-sdk-a-v241806999.233012000.1%29&uid=&banner_size=1920x1080&os=iOS&osv=14&tag=477097&sub_id=87&sub_id_1=NBT+Android+Apps&source_bundle_id=com.nbt.reader&placement=0&adv_id=64&site_flag=0&adv_payout=5000.0&bid_price=5.0')
-        src='https://assets.icwdsp.com/creatives/64/Banner/adidas_brand__Screenshot_from_2024-09-05_19-36-48_20240926063251_3.png'
-        width='1920' height='1080'></a
-      >
-    </div>
+
+    // Initialize the ad system
+    document.addEventListener('DOMContentLoaded', () => {
+      const adSystem = new AdSystem();
+      adSystem.initialize();
+    });
+    </script>
   </body>
 </html>

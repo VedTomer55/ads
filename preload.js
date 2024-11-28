@@ -36,34 +36,34 @@ const FALLBACK_IMAGES = {
 const AD_SLOTS = {
   headerAd: {
     id: 'div-gpt-ad-header',
-    sizes: [[300, 50]],
+    sizes: [[1920, 1080]],
     position: 'header'
   },
-  sidebarLargeAd: {
-    id: 'div-gpt-ad-sidebar-large',
-    sizes: [[300, 600]],
-    position: 'sidebar'
-  },
-  sidebarSmallAd: {
-    id: 'div-gpt-ad-sidebar-small',
-    sizes: [[300, 250]],
-    position: 'sidebar'
-  },
-  inlineAd: {
-    id: 'div-gpt-ad-inline',
-    sizes: [[300, 50]],
-    position: 'content'
-  },
-  bottomAd: {
-    id: 'div-gpt-ad-bottom',
-    sizes: [[480, 320]],
-    position: 'bottom'
-  },
-  footerAd: {
-    id: 'div-gpt-ad-footer',
-    sizes: [[320, 480]],
-    position: 'footer'
-  }
+  // sidebarLargeAd: {
+  //   id: 'div-gpt-ad-sidebar-large',
+  //   sizes: [[300, 600]],
+  //   position: 'sidebar'
+  // },
+  // sidebarSmallAd: {
+  //   id: 'div-gpt-ad-sidebar-small',
+  //   sizes: [[300, 250]],
+  //   position: 'sidebar'
+  // },
+  // inlineAd: {
+  //   id: 'div-gpt-ad-inline',
+  //   sizes: [[300, 50]],
+  //   position: 'content'
+  // },
+  // bottomAd: {
+  //   id: 'div-gpt-ad-bottom',
+  //   sizes: [[480, 320]],
+  //   position: 'bottom'
+  // },
+  // footerAd: {
+  //   id: 'div-gpt-ad-footer',
+  //   sizes: [[320, 480]],
+  //   position: 'footer'
+  // }
 };
 
 // User information collector class
@@ -423,12 +423,12 @@ async function initializeEnhancedAds() {
     try {
       adManager.bidders.set("bidder1", {
         name: "PremiumBidder",
-        endpoint: "https://premium-bidder.example.com/bid",
+        endpoint: "https://bidder.verismart.ai/advilion",
       });
-      adManager.bidders.set("bidder2", {
-        name: "StandardBidder",
-        endpoint: "https://standard-bidder.example.com/bid",
-      });
+      // adManager.bidders.set("bidder2", {
+      //   name: "StandardBidder",
+      //   endpoint: "https://standard-bidder.example.com/bid",
+      // });
     } catch (error) {
       console.error("Error setting up bidders:", error);
     }
