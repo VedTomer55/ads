@@ -1,3 +1,146 @@
+ // Function to detect device type
+ function detectDeviceType() {
+  const ua = navigator.userAgent;
+
+  if (/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+      if (/Tablet|iPad/i.test(ua)) return { name: "Tablet", val: 5 };
+      return { name: "Phone", val: 4 };
+  }
+  if (/SmartTV|TV/i.test(ua)) return { name: "Connected TV", val: 3 };
+  if (/Mac|Windows|Linux/i.test(ua)) return { name: "Personal Computer", val: 2 };
+  return { name: "Connected Device", val: 6 };
+}
+
+// Function to fetch geolocation and reverse geocode details
+async function getGeoDetails() {
+  return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                  const { latitude, longitude } = position.coords;
+
+                  // Reverse geocoding using OpenCage API
+                  const apiKey = "4a66cf6230d04397925f9a20288934a2"; // Replace with your OpenCage API key
+                  const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+
+                  try {
+                      const response = await fetch(geocodeUrl);
+                      const data = await response.json();
+
+                      if (data.results && data.results[0]) {
+                          const location = data.results[0].components;
+                          resolve({
+                              lat: latitude,
+                              lon: longitude,
+                              type: 1,
+                              country: location?.['ISO_3166-1_alpha-3'] || "unknown",
+                              region: location.state_code || "unknown",
+                              city: location.city || location.town || location.village || "unknown",
+                          });
+                      } else {
+                          resolve({
+                              lat: latitude,
+                              lon: longitude,
+                              type: 1,
+                              country: "unknown",
+                              region: "unknown",
+                              city: "unknown",
+                          });
+                      }
+                  } catch (error) {
+                      console.error("Error fetching reverse geocoding data:", error);
+                      resolve({
+                          lat: latitude,
+                          lon: longitude,
+                          type: 1,
+                          country: "unknown",
+                          region: "unknown",
+                          city: "unknown",
+                      });
+                  }
+              },
+              (error) => {
+                  console.error("Error fetching geolocation:", error);
+                  reject({
+                      lat: 0,
+                      lon: 0,
+                      type: 2,
+                      country: "unknown",
+                      region: "unknown",
+                      city: "unknown",
+                  });
+              }
+          );
+      } else {
+          console.warn("Geolocation is not supported by this browser.");
+          reject({
+              lat: 0,
+              lon: 0,
+              type: 2,
+              country: "unknown",
+              region: "unknown",
+              city: "unknown",
+          });
+      }
+  });
+}
+
+// Function to fetch IPv6 address
+async function getIpv6Address() {
+  try {
+      const response = await fetch("https://api64.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip || "unknown";
+  } catch (error) {
+      console.error("Failed to fetch IPv6 address:", error);
+      return "unknown";
+  }
+}
+
+// Initialize ad system configuration
+async function initializeAdSystemConfig() {
+  const deviceDetails = detectDeviceType();
+  const ipv6 = await getIpv6Address();
+
+  try {
+      const geoDetails = await getGeoDetails();
+      window.adSystemConfig = {
+        //  bidderUrl: "https://bidder.verismart.ai/advilion",
+        bidderUrl: "http://127.0.0.1:8000/api/ssp-load-ads",
+
+          // Site Information
+          siteId: "87",
+          siteName: "NBT Android Apps",
+          siteBundle: "com.nbt.reader",
+
+          // Bidding Configuration
+          bidFloor: 5,
+          bidFloorCur: "INR",
+          currency: "INR",
+
+          // Geo Information
+          geo: geoDetails,
+
+          // Device Information
+          ipv6: ipv6,
+          deviceType: deviceDetails.val,
+          deviceMake: navigator.vendor || "Unknown",
+          deviceModel: navigator.platform || "Unknown",
+          deviceOs: navigator.userAgentData?.platform || navigator.platform || "Unknown",
+          deviceOsVersion: navigator.userAgent.match(/OS ([\\d_]+)/)?.[1] || "Unknown",
+          deviceCarrier: "unknown", // Replace if carrier data can be retrieved
+      };
+
+      console.log("Ad System Config:", window.adSystemConfig);
+  } catch (error) {
+      console.error("Failed to fetch geo details:", error);
+  }
+}
+
+// Initialize on page load
+window.addEventListener("DOMContentLoaded", initializeAdSystemConfig);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class AdSystem {
   constructor() {
     this.bidderUrl = "";
@@ -6,11 +149,22 @@ class AdSystem {
   }
 
   async initialize() {
-    // Load configuration from global variable
-    if (typeof window.adSystemConfig === 'undefined') {
-      console.error('Ad System Configuration not found. Please define window.adSystemConfig.');
-      return;
-    }
+   // Retry configuration
+   const maxRetries = 5; // Maximum number of retries
+   const delayMs = 1000; // Delay between retries (in milliseconds)
+   let attempt = 0;
+
+   // Retry logic
+   while (typeof window.adSystemConfig === 'undefined' && attempt < maxRetries) {
+       console.warn(`Ad System Configuration not found. Retrying (${attempt + 1}/${maxRetries})...`);
+       await new Promise(resolve => setTimeout(resolve, delayMs)); // Wait before retrying
+       attempt++;
+   }
+
+   if (typeof window.adSystemConfig === 'undefined') {
+       console.error("Ad System Configuration not found after retries. Please define window.adSystemConfig.");
+       return;
+   }
 
     this.config = window.adSystemConfig;
     this.bidderUrl = this.config.bidderUrl;
@@ -21,15 +175,16 @@ class AdSystem {
     for (const slotElement of this.adSlots) {
       const width = parseInt(slotElement.dataset.width, 10) || 0;
       const height = parseInt(slotElement.dataset.height, 10) || 0;
+      const slot_id = parseInt(slotElement.dataset.slot_id, 10) || 0;
 
-      if (width && height) {
+      if (width && height && slot_id) {
         slotElement.style.width = `${width}px`;
         slotElement.style.height = `${height}px`;
         slotElement.innerHTML = `Loading ad for ${width}x${height}...`;
 
-        await this.loadAdForSlot(slotElement, { width, height });
+        await this.loadAdForSlot(slotElement, { slot_id });
       } else {
-        this.showError(slotElement, "Ad size not defined.");
+        this.showError(slotElement, "Ad size & slot not defined.");
       }
     }
   }
@@ -47,30 +202,32 @@ class AdSystem {
   async makeBidRequest(slot) {
     // Construct bid request using configuration from global variable
     const bidRequest = {
-      id: this.generateUUID(),
-      imp: [
-        {
-          id: "1",
-          banner: {
-            w: slot.width,
-            h: slot.height,
-            pos: 0,
-          },
-          tagid: this.config.tagId,
-          bidfloor: this.config.bidFloor,
-          bidfloorcur: this.config.bidFloorCur,
-          secure: 1,
-        },
-      ],
-      site: {
-        id: this.config.siteId,
-        name: this.config.siteName,
-        bundle: this.config.siteBundle,
-        domain: location.hostname,
-        publisher: {
-          id: this.config.publisherId,
-        },
-      },
+      // id: this.generateUUID(),
+      slot_id:slot.slot_id,
+      // imp: [
+      //   {
+      //     id: "1",
+      //     banner: {
+      //       // w: slot.width,
+      //       // h: slot.height,
+           
+      //       // pos: 0,
+      //     },
+      //     // tagid: this.config.tagId,
+      //     // bidfloor: this.config.bidFloor,
+      //     // bidfloorcur: this.config.bidFloorCur,
+      //     // secure: 1,
+      //   },
+      // ],
+      // site: {
+      //   id: this.config.siteId,
+      //   name: this.config.siteName,
+      //   bundle: this.config.siteBundle,
+      //   domain: location.hostname,
+      //   publisher: {
+      //     id: this.config.publisherId,
+      //   },
+      // },
       device: {
         ua: navigator.userAgent,
         geo: this.config.geo,
@@ -83,12 +240,12 @@ class AdSystem {
         js: 1,
         carrier: this.config.deviceCarrier,
       },
-      user: {
-        buyeruid: this.generateUUID(),
-      },
-      at: 1,
-      tmax: 480,
-      cur: [this.config.currency],
+      // user: {
+      //   buyeruid: this.generateUUID(),
+      // },
+      // at: 1,
+      // tmax: 480,
+      // cur: [this.config.currency],
     };
 
     const response = await fetch(this.bidderUrl, {
@@ -125,7 +282,7 @@ class AdSystem {
     img.style.width = "100%";
     img.style.height = "auto";
 
-    // Handle viewability tracking
+  //  Handle viewability tracking
     img.onload = () => {
       if (urls.impressionUrl) this.sendImpression(urls.impressionUrl);
     };
@@ -135,7 +292,7 @@ class AdSystem {
     slotElement.appendChild(anchor);
 
     // Win notice handling
-    if (bid.nurl) this.sendImpression(this.replaceAuctionMacros(bid.nurl, bid));
+    if (bid.nurl) this.sendImpression(this.replaceAuctionMacros(bid.nurl, bidResponse));
   }
 
   extractUrls(adm) {
@@ -153,17 +310,27 @@ class AdSystem {
 
   sendImpression(url) {
     if (!url) return;
+    console.log(url);
     fetch(url, { method: "GET", mode: "no-cors", credentials: "omit" }).catch(
       (err) => console.warn("Impression failed:", err)
     );
   }
 
-  replaceAuctionMacros(url, bid) {
+  replaceAuctionMacros(url, bidResponse) {
+    // Extract bid object from the seatbid array
+    const bid = bidResponse.seatbid[0].bid[0];
+    
     return url
-      .replace("${AUCTION_ID}", bid.id || "")
-      .replace("${AUCTION_PRICE}", bid.price || "")
-      .replace("${AUCTION_CURRENCY}", this.config.currency);
-  }
+        .replace(/\${AUCTION_ID}/g, bidResponse.id || '')
+        .replace(/\${AUCTION_BID_ID}/g, bid.id || '')
+        .replace(/\${AUCTION_IMP_ID}/g, bid.impid || '')
+        .replace(/\${AUCTION_SEAT_ID}/g, bidResponse.seatbid[0].seat || '')
+        .replace(/\${AUCTION_PRICE}/g, bid.price?.toString() || '')
+        .replace(/\${AUCTION_CURRENCY}/g, bidResponse.cur || '')
+        .replace(/\${AUCTION_MBR}/g, '') // If MBR is not provided in response
+        .replace(/\${AUCTION_AD_ID}/g, bid.adid || '')
+        .replace(/\${AUCTION_LOSS}/g, ''); // For loss URL if needed
+}
 
   showError(slotElement, message) {
     slotElement.innerHTML = `<div class="text-danger">${message}</div>`;
