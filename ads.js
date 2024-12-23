@@ -101,27 +101,11 @@ async function getIpv6Address() {
 async function initializeAdSystemConfig() {
   const deviceDetails = detectDeviceType();
   const ipv6 = await getIpv6Address();
-
   try {
       const geoDetails = await getGeoDetails();
       window.adSystemConfig = {
-        //  bidderUrl: "https://bidder.verismart.ai/advilion",
         bidderUrl: "http://127.0.0.1:8000/api/ssp-load-ads",
-
-          // Site Information
-          siteId: "87",
-          siteName: "NBT Android Apps",
-          siteBundle: "com.nbt.reader",
-
-          // Bidding Configuration
-          bidFloor: 5,
-          bidFloorCur: "INR",
-          currency: "INR",
-
-          // Geo Information
           geo: geoDetails,
-
-          // Device Information
           ipv6: ipv6,
           deviceType: deviceDetails.val,
           deviceMake: navigator.vendor || "Unknown",
@@ -150,8 +134,8 @@ class AdSystem {
 
   async initialize() {
    // Retry configuration
-   const maxRetries = 5; // Maximum number of retries
-   const delayMs = 1000; // Delay between retries (in milliseconds)
+   const maxRetries = 5; 
+   const delayMs = 1000; 
    let attempt = 0;
 
    // Retry logic
@@ -200,34 +184,8 @@ class AdSystem {
   }
 
   async makeBidRequest(slot) {
-    // Construct bid request using configuration from global variable
     const bidRequest = {
-      // id: this.generateUUID(),
       slot_id:slot.slot_id,
-      // imp: [
-      //   {
-      //     id: "1",
-      //     banner: {
-      //       // w: slot.width,
-      //       // h: slot.height,
-           
-      //       // pos: 0,
-      //     },
-      //     // tagid: this.config.tagId,
-      //     // bidfloor: this.config.bidFloor,
-      //     // bidfloorcur: this.config.bidFloorCur,
-      //     // secure: 1,
-      //   },
-      // ],
-      // site: {
-      //   id: this.config.siteId,
-      //   name: this.config.siteName,
-      //   bundle: this.config.siteBundle,
-      //   domain: location.hostname,
-      //   publisher: {
-      //     id: this.config.publisherId,
-      //   },
-      // },
       device: {
         ua: navigator.userAgent,
         geo: this.config.geo,
@@ -240,12 +198,6 @@ class AdSystem {
         js: 1,
         carrier: this.config.deviceCarrier,
       },
-      // user: {
-      //   buyeruid: this.generateUUID(),
-      // },
-      // at: 1,
-      // tmax: 480,
-      // cur: [this.config.currency],
     };
 
     const response = await fetch(this.bidderUrl, {
@@ -335,13 +287,16 @@ class AdSystem {
   showError(slotElement, message) {
     slotElement.innerHTML = `<div class="text-danger">${message}</div>`;
   }
-
-  generateUUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) =>
-      ((Math.random() * 16) | 0).toString(16)
-    );
-  }
 }
+
+
+
+
+
+
+
+
+
 
 // Initialize the ad system
 document.addEventListener("DOMContentLoaded", () => {
