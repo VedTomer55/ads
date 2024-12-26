@@ -224,7 +224,6 @@ class AdSystem {
 
     const response = await fetch(this.bidderUrl, {
       method: "POST",
-      // headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bidRequest),
     });
 
