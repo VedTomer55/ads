@@ -224,21 +224,13 @@ class AdSystem {
 
     const response = await fetch(this.bidderUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        // Adding CORS headers
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type"
-      },
-      mode: "cors", // Explicitly set CORS mode
-      credentials: "include", // Include credentials if needed
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bidRequest),
     });
 
     if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
     return response.json();
-}
+  }
 
  
   renderAd(slotElement, bidResponse) {
